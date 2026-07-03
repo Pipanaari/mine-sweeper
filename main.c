@@ -1,27 +1,56 @@
 #include "raylib.h"
+#include <string.h>
+#include <stdio.h>
 
 int main(void) {
     const int screenWidth = 800;
     const int screenHeight = 450;
 
-    int gridWidth = 10, gridHeight = 10, cellSize = 20, gap = 1;
+    int gridWidth = 10, gridHeight = 10, cellSize = 40, gap = 1, bombs = 10;
+    char tiles[gridWidth * gridHeight];
+    memset(tiles, '0', sizeof tiles);
 
     InitWindow(screenWidth, screenHeight, "Mine Sweeper");
 
     SetTargetFPS(60);
 
+
+    for (int i = 0; i < bombs; i++) {
+      int x = GetRandomValue(0, gridWidth - 1);
+      int y = GetRandomValue(0, gridHeight - 1);
+      if (tiles[y * gridWidth + x] == 'B') continue;
+
+      tiles[y * gridWidth + x] = 'B';
+      for (int j = -1; j < 2; j++) {
+        for (int k = -1; k < 2; k++) {
+          if (y + j < 0 || y + j == gridHeight || x + k < 0 || x + k == gridWidth) continue;
+
+          int pos = (y + j) * gridWidth + (x + k);
+          if (tiles[pos] != 'B') tiles[pos]++;
+        }
+      }
+    }
+
     while (!WindowShouldClose()) {
       BeginDrawing();
 
+      ClearBackground(RAYWHITE);
 
-      for(int y = 0; y < gridHeight; y++){
-        for(int x = 0; x < gridWidth; x++){
-          DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, BLUE);
+      for (int y = 0; y < gridHeight; y++) {
+        for (int x = 0; x < gridWidth; x++) {
+          if (tiles[y * gridWidth + x] == 'B') {
+            DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, RED);
+          }
+          else {
+            DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, BLUE);
+          }
+
+          char tile[2];
+          tile[0] = tiles[y * gridWidth + x];
+          DrawText(tile, x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
         }
       }
 
-      ClearBackground(RAYWHITE);
-      DrawText("Hello World!", 370, 200, 20, LIGHTGRAY);
 
       EndDrawing();
     }
