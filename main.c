@@ -8,12 +8,14 @@ int main(void) {
 
     int gridWidth = 10, gridHeight = 10, cellSize = 40, gap = 1, bombs = 10;
     char tiles[gridWidth * gridHeight];
+    char activity[gridWidth * gridHeight];
+
     memset(tiles, '0', sizeof tiles);
+    memset(activity, 0, sizeof activity);
 
     InitWindow(screenWidth, screenHeight, "Mine Sweeper");
 
     SetTargetFPS(60);
-
 
     for (int i = 0; i < bombs; i++) {
       int x = GetRandomValue(0, gridWidth - 1);
@@ -36,18 +38,34 @@ int main(void) {
 
       ClearBackground(RAYWHITE);
 
+      int mouseX = GetMouseX();
+      int mouseY = GetMouseY();
+
+      int mouseCellX = mouseX / (cellSize + gap);
+      int mouseCellY = mouseY / (cellSize + gap);
+
+      if (mouseX % (cellSize + gap) > cellSize) mouseCellX = -1;
+      if (mouseY % (cellSize + gap) > cellSize) mouseCellY = -1;
+
+      if (IsMouseButtonPressed(0)) {
+        if (mouseCellY != -1 && mouseCellX != -1) {
+          activity[mouseCellY * gridWidth + mouseCellX] = 'C';
+        }
+      }
+
       for (int y = 0; y < gridHeight; y++) {
         for (int x = 0; x < gridWidth; x++) {
-          if (tiles[y * gridWidth + x] == 'B') {
-            DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, RED);
-          }
-          else {
-            DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, BLUE);
-          }
+          DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, BLUE);
 
-          char tile[2];
-          tile[0] = tiles[y * gridWidth + x];
-          DrawText(tile, x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
+          if (activity[y * gridWidth + x] == 'C') {
+            if (tiles[y * gridWidth + x] == 'B') {
+              DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, RED);
+            }
+
+            char tile[2];
+            tile[0] = tiles[y * gridWidth + x];
+            DrawText(tile, x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
+          }
         }
       }
 
