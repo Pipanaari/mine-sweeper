@@ -6,10 +6,9 @@ int main(void) {
     const int screenWidth = 800;
     const int screenHeight = 450;
 
-    int gridWidth = 10, gridHeight = 10, cellSize = 40, gap = 1, bombs = 10;
-    char tiles[gridWidth * gridHeight];
+    int gridWidth = 10, gridHeight = 10, cellSize = 40, gap = 1, bombCount = 10;
+    int tiles[gridWidth * gridHeight];
     char activity[gridWidth * gridHeight];
-
     memset(tiles, '0', sizeof tiles);
     memset(activity, 0, sizeof activity);
 
@@ -17,12 +16,14 @@ int main(void) {
 
     SetTargetFPS(60);
 
-    for (int i = 0; i < bombs; i++) {
-      int x = GetRandomValue(0, gridWidth - 1);
-      int y = GetRandomValue(0, gridHeight - 1);
-      if (tiles[y * gridWidth + x] == 'B') continue;
+    int *bombs = LoadRandomSequence(bombCount, 0, gridWidth * gridHeight - 1);
 
-      tiles[y * gridWidth + x] = 'B';
+    for (int i = 0; i < bombCount; i++) {
+
+      int x = bombs[i] % gridWidth;
+      int y = bombs[i] / gridWidth;
+
+      tiles[bombs[i]] = 'B';
       for (int j = -1; j < 2; j++) {
         for (int k = -1; k < 2; k++) {
           if (y + j < 0 || y + j == gridHeight || x + k < 0 || x + k == gridWidth) continue;
