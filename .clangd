@@ -1,0 +1,5 @@
+CompileFlags:
+  Add:
+    - "-IC:/raylib/raylib/src"
+    - "-Iexternal"
+    - "-DPLATFORM_DESKTOP"
