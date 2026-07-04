@@ -7,7 +7,7 @@ int main(void) {
     const int screenHeight = 450;
 
     int gridWidth = 10, gridHeight = 10, cellSize = 40, gap = 1, bombCount = 10;
-    int tiles[gridWidth * gridHeight];
+    char tiles[gridWidth * gridHeight];
     char activity[gridWidth * gridHeight];
     memset(tiles, '0', sizeof tiles);
     memset(activity, 0, sizeof activity);
@@ -24,8 +24,8 @@ int main(void) {
       int y = bombs[i] / gridWidth;
 
       tiles[bombs[i]] = 'B';
-      for (int j = -1; j < 2; j++) {
-        for (int k = -1; k < 2; k++) {
+      for (int j = -1; j <= 1; j++) {
+        for (int k = -1; k <= 1; k++) {
           if (y + j < 0 || y + j == gridHeight || x + k < 0 || x + k == gridWidth) continue;
 
           int pos = (y + j) * gridWidth + (x + k);
@@ -45,8 +45,8 @@ int main(void) {
       int mouseCellX = mouseX / (cellSize + gap);
       int mouseCellY = mouseY / (cellSize + gap);
 
-      if (mouseX % (cellSize + gap) > cellSize) mouseCellX = -1;
-      if (mouseY % (cellSize + gap) > cellSize) mouseCellY = -1;
+      if (mouseX % (cellSize + gap) > cellSize || mouseCellX >= gridWidth) mouseCellX = -1;
+      if (mouseY % (cellSize + gap) > cellSize || mouseCellY >= gridHeight) mouseCellY = -1;
 
       if (IsMouseButtonPressed(0)) {
         if (mouseCellY != -1 && mouseCellX != -1) {
@@ -63,9 +63,7 @@ int main(void) {
               DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, RED);
             }
 
-            char tile[2];
-            tile[0] = tiles[y * gridWidth + x];
-            DrawText(tile, x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
+            DrawText((char []){ tiles[y * gridWidth + x], '\0' }, x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
           }
         }
       }
