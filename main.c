@@ -71,7 +71,7 @@ int main(void) {
                 if (y + j < 0 || y + j == gridHeight || x + k < 0 || x + k == gridWidth) continue;
 
                 pos = (y + j) * gridWidth + (x + k);
-                if (activity[pos] != 0) continue;
+                if (activity[pos] == 'C') continue;
 
                 activity[pos] = 'C';
                 if (tiles[pos] == '0') unvisitedPositions[unvisitedTilesLeft++] = pos;
