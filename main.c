@@ -7,7 +7,7 @@ int main(void) {
     const int screenHeight = 450;
 
     int gridWidth = 10, gridHeight = 10, cellSize = 40, gap = 1, bombCount = 10;
-    int tiles[gridWidth * gridHeight];
+    char tiles[gridWidth * gridHeight];
     char activity[gridWidth * gridHeight];
     memset(tiles, '0', sizeof tiles);
     memset(activity, 0, sizeof activity);
@@ -63,9 +63,7 @@ int main(void) {
               DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, RED);
             }
 
-            char tile[2];
-            tile[0] = tiles[y * gridWidth + x];
-            DrawText(tile, x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
+            DrawText((char []){ tiles[y * gridWidth + x], '\0' }, x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
           }
         }
       }
