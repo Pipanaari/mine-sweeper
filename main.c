@@ -34,6 +34,8 @@ int main(void) {
       }
     }
 
+    UnloadRandomSequence(bombs);
+
     while (!WindowShouldClose()) {
       BeginDrawing();
 
@@ -50,7 +52,32 @@ int main(void) {
 
       if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] != 'F') {
-          activity[mouseCellY * gridWidth + mouseCellX] = 'C';
+          int unvisitedTilesLeft = 1, unvisitedPositions[gridWidth * gridHeight];
+
+          int pos = mouseCellY * gridWidth + mouseCellX;
+          activity[pos] = 'C';
+          unvisitedPositions[0] = pos;
+
+          while (unvisitedTilesLeft) {
+            pos = unvisitedPositions[--unvisitedTilesLeft];
+
+            if (tiles[pos] != '0') continue;
+
+            int x = pos % gridWidth;
+            int y = pos / gridWidth;
+
+            for (int j = -1; j <= 1; j++) {
+              for (int k = -1; k <= 1; k++) {
+                if (y + j < 0 || y + j == gridHeight || x + k < 0 || x + k == gridWidth) continue;
+
+                pos = (y + j) * gridWidth + (x + k);
+                if (activity[pos] != 0) continue;
+
+                activity[pos] = 'C';
+                if (tiles[pos] == '0') unvisitedPositions[unvisitedTilesLeft++] = pos;
+              }
+            }
+          }
         }
       }
       if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
