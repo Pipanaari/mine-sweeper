@@ -52,17 +52,20 @@ int main(void) {
 
       if (IsMouseButtonPressed(0)) {
         if (mouseCellY != -1 && mouseCellX != -1) {
-          int index = 0, indices[gridWidth * gridHeight];
+          int unvisitedTilesLeft = 1, unvisitedPositions[gridWidth * gridHeight];
 
           int pos = mouseCellY * gridWidth + mouseCellX;
           activity[pos] = 'C';
-          indices[0] = pos;
+          unvisitedPositions[0] = pos;
 
-          search:
-          pos = indices[index--];
-          int x = pos % gridWidth;
-          int y = pos / gridWidth;
-          if (tiles[pos] == '0') {
+          while (unvisitedTilesLeft) {
+            pos = unvisitedPositions[--unvisitedTilesLeft];
+
+            if (tiles[pos] != '0') continue;
+
+            int x = pos % gridWidth;
+            int y = pos / gridWidth;
+
             for (int j = -1; j <= 1; j++) {
               for (int k = -1; k <= 1; k++) {
                 if (y + j < 0 || y + j == gridHeight || x + k < 0 || x + k == gridWidth) continue;
@@ -71,12 +74,10 @@ int main(void) {
                 if (activity[pos] != 0) continue;
 
                 activity[pos] = 'C';
-                if (tiles[pos] == '0') indices[++index] = pos;
+                if (tiles[pos] == '0') unvisitedPositions[unvisitedTilesLeft++] = pos;
               }
             }
           }
-
-          if (index != -1) goto search;
         }
       }
 
