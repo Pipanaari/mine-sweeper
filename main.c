@@ -48,9 +48,17 @@ int main(void) {
       if (mouseX % (cellSize + gap) > cellSize || mouseCellX >= gridWidth) mouseCellX = -1;
       if (mouseY % (cellSize + gap) > cellSize || mouseCellY >= gridHeight) mouseCellY = -1;
 
-      if (IsMouseButtonPressed(0)) {
-        if (mouseCellY != -1 && mouseCellX != -1) {
+      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] != 'F') {
           activity[mouseCellY * gridWidth + mouseCellX] = 'C';
+        }
+      }
+      if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+        if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
+          activity[mouseCellY * gridWidth + mouseCellX] = 'F';
+        }
+        else if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 'F'){
+          activity[mouseCellY * gridWidth + mouseCellX] = 0;
         }
       }
 
@@ -58,6 +66,9 @@ int main(void) {
         for (int x = 0; x < gridWidth; x++) {
           DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, BLUE);
 
+          if (activity[y * gridWidth + x] == 'F'){
+            DrawText("F", x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
+          }
           if (activity[y * gridWidth + x] == 'C') {
             if (tiles[y * gridWidth + x] == 'B') {
               DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, RED);
