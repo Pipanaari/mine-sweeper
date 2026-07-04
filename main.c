@@ -34,6 +34,8 @@ int main(void) {
       }
     }
 
+    UnloadRandomSequence(bombs);
+
     while (!WindowShouldClose()) {
       BeginDrawing();
 
