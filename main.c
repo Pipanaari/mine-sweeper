@@ -94,14 +94,19 @@ int main(void) {
           DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, BLUE);
 
           if (activity[y * gridWidth + x] == 'F'){
+            DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, GREEN);
             DrawText("F", x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
           }
           if (activity[y * gridWidth + x] == 'C') {
             if (tiles[y * gridWidth + x] == 'B') {
               DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, RED);
             }
-
-            DrawText((char []){ tiles[y * gridWidth + x], '\0' }, x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
+            else {
+              DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, GRAY);
+            }
+            if (tiles[y * gridWidth + x] != '0'){
+              DrawText((char []){ tiles[y * gridWidth + x], '\0' }, x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
+            }
           }
         }
       }
