@@ -2,6 +2,30 @@
 #include <string.h>
 #include <stdio.h>
 
+void init(int bombCount, int gridWidth, int gridHeight, char tiles[], char activity[]) {
+  memset(tiles, '0', gridWidth * gridHeight);
+  memset(activity, 0, gridWidth * gridHeight);
+  int *bombs = LoadRandomSequence(bombCount, 0, gridWidth * gridHeight - 1);
+
+  for (int i = 0; i < bombCount; i++) {
+
+    int x = bombs[i] % gridWidth;
+    int y = bombs[i] / gridWidth;
+
+    tiles[bombs[i]] = 'B';
+    for (int j = -1; j <= 1; j++) {
+      for (int k = -1; k <= 1; k++) {
+        if (y + j < 0 || y + j == gridHeight || x + k < 0 || x + k == gridWidth) continue;
+
+        int pos = (y + j) * gridWidth + (x + k);
+        if (tiles[pos] != 'B') tiles[pos]++;
+      }
+    }
+  }
+
+  UnloadRandomSequence(bombs);
+}
+
 int main(void) {
     const int screenWidth = 800;
     const int screenHeight = 450;
@@ -9,34 +33,18 @@ int main(void) {
     int gridWidth = 10, gridHeight = 10, cellSize = 40, gap = 1, bombCount = 10;
     char tiles[gridWidth * gridHeight];
     char activity[gridWidth * gridHeight];
-    memset(tiles, '0', sizeof tiles);
-    memset(activity, 0, sizeof activity);
 
     InitWindow(screenWidth, screenHeight, "Mine Sweeper");
 
     SetTargetFPS(60);
 
-    int *bombs = LoadRandomSequence(bombCount, 0, gridWidth * gridHeight - 1);
-
-    for (int i = 0; i < bombCount; i++) {
-
-      int x = bombs[i] % gridWidth;
-      int y = bombs[i] / gridWidth;
-
-      tiles[bombs[i]] = 'B';
-      for (int j = -1; j <= 1; j++) {
-        for (int k = -1; k <= 1; k++) {
-          if (y + j < 0 || y + j == gridHeight || x + k < 0 || x + k == gridWidth) continue;
-
-          int pos = (y + j) * gridWidth + (x + k);
-          if (tiles[pos] != 'B') tiles[pos]++;
-        }
-      }
-    }
-
-    UnloadRandomSequence(bombs);
+    init(bombCount, gridWidth, gridHeight, tiles, activity);
 
     while (!WindowShouldClose()) {
+      if (IsKeyPressed(KEY_R)) {
+        init(bombCount, gridWidth, gridHeight, tiles, activity);
+      }
+
       BeginDrawing();
 
       ClearBackground(RAYWHITE);
