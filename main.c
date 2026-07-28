@@ -48,7 +48,7 @@ Texture2D loadTexture(const char *fileName) {
 }
 
 int main(void) {
-    int gridWidth = 10, gridHeight = 10, cellSize = 48, gap = 1, bombCount = 10, dead = 0;
+    int gridWidth = 10, gridHeight = 10, cellSize = 48, gap = 0, bombCount = 10, dead = 0;
     char tiles[gridWidth * gridHeight];
     char activity[gridWidth * gridHeight];
 
@@ -62,6 +62,7 @@ int main(void) {
 
     init(bombCount, gridWidth, gridHeight, tiles, activity, &dead);
 
+    Texture2D blank = loadTexture("textures/tile-unknown.png");
     Texture2D tile0 = loadTexture("textures/tile-0.png");
     Texture2D tile1 = loadTexture("textures/tile-1.png");
     Texture2D tile2 = loadTexture("textures/tile-2.png");
@@ -71,6 +72,9 @@ int main(void) {
     Texture2D tile6 = loadTexture("textures/tile-6.png");
     Texture2D tile7 = loadTexture("textures/tile-7.png");
     Texture2D tile8 = loadTexture("textures/tile-8.png");
+    Texture2D flag = loadTexture("textures/tile-flag.png");
+    Texture2D bomb = loadTexture("textures/tile-bomb.png");
+    Texture2D explode = loadTexture("textures/tile-bomb-detonated.png");
 
 
     while (!WindowShouldClose()) {
@@ -132,21 +136,20 @@ int main(void) {
 
       for (int y = 0; y < gridHeight; y++) {
         for (int x = 0; x < gridWidth; x++) {
-          DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, BLUE);
+          drawTile(blank, x * (cellSize + gap), y * (cellSize + gap));
 
           if (activity[y * gridWidth + x] == 'F'){
-            DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, GREEN);
-            DrawText("F", x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
+            drawTile(flag, x * (cellSize + gap), y * (cellSize + gap));
           }
           if (activity[y * gridWidth + x] == 0 && dead == 1) {
             if (tiles[y * gridWidth + x] == 'B') {
-              DrawText("B", x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
+              drawTile(bomb, x * (cellSize + gap), y * (cellSize + gap));
             }
           }
           if (activity[y * gridWidth + x] == 'C') {
             if (tiles[y * gridWidth + x] == 'B') {
               dead = 1;
-              DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, RED);
+              drawTile(explode, x * (cellSize + gap), y * (cellSize + gap));
             }
             else {
               DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, GRAY);
