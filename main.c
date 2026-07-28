@@ -75,6 +75,7 @@ int main(void) {
     Texture2D flag = loadTexture("textures/tile-flag.png");
     Texture2D bomb = loadTexture("textures/tile-bomb.png");
     Texture2D explode = loadTexture("textures/tile-bomb-detonated.png");
+    Texture2D not_bomb = loadTexture("textures/tile-bomb-mismarked.png");
 
 
     while (!WindowShouldClose()) {
@@ -138,8 +139,15 @@ int main(void) {
         for (int x = 0; x < gridWidth; x++) {
           drawTile(blank, x * (cellSize + gap), y * (cellSize + gap));
 
-          if (activity[y * gridWidth + x] == 'F'){
-            drawTile(flag, x * (cellSize + gap), y * (cellSize + gap));
+          if (activity[y * gridWidth + x] == 'F') {
+            if (dead == 1) {
+              if (tiles[y * gridWidth + x] != 'B') {
+                drawTile(not_bomb, x * (cellSize + gap), y * (cellSize + gap));
+              }
+            }
+            else {
+              drawTile(flag, x * (cellSize + gap), y * (cellSize + gap));
+            }
           }
           if (activity[y * gridWidth + x] == 0 && dead == 1) {
             if (tiles[y * gridWidth + x] == 'B') {
