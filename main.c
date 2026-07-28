@@ -2,10 +2,12 @@
 #include <string.h>
 #include <stdio.h>
 
-void init(int bombCount, int gridWidth, int gridHeight, char tiles[], char activity[]) {
+void init(int bombCount, int gridWidth, int gridHeight, char tiles[], char activity[], int* dead) {
   memset(tiles, '0', gridWidth * gridHeight);
   memset(activity, 0, gridWidth * gridHeight);
   int *bombs = LoadRandomSequence(bombCount, 0, gridWidth * gridHeight - 1);
+
+  *dead = 0;
 
   for (int i = 0; i < bombCount; i++) {
 
@@ -30,7 +32,7 @@ int main(void) {
     const int screenWidth = 800;
     const int screenHeight = 450;
 
-    int gridWidth = 10, gridHeight = 10, cellSize = 40, gap = 1, bombCount = 10;
+    int gridWidth = 10, gridHeight = 10, cellSize = 40, gap = 1, bombCount = 10, dead = 0;
     char tiles[gridWidth * gridHeight];
     char activity[gridWidth * gridHeight];
 
@@ -38,11 +40,11 @@ int main(void) {
 
     SetTargetFPS(60);
 
-    init(bombCount, gridWidth, gridHeight, tiles, activity);
+    init(bombCount, gridWidth, gridHeight, tiles, activity, &dead);
 
     while (!WindowShouldClose()) {
       if (IsKeyPressed(KEY_R)) {
-        init(bombCount, gridWidth, gridHeight, tiles, activity);
+        init(bombCount, gridWidth, gridHeight, tiles, activity, &dead);
       }
 
       BeginDrawing();
@@ -58,7 +60,7 @@ int main(void) {
       if (mouseX % (cellSize + gap) > cellSize || mouseCellX >= gridWidth) mouseCellX = -1;
       if (mouseY % (cellSize + gap) > cellSize || mouseCellY >= gridHeight) mouseCellY = -1;
 
-      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && dead == 0) {
         if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] != 'F') {
           int unvisitedTilesLeft = 1, unvisitedPositions[gridWidth * gridHeight];
 
@@ -88,7 +90,7 @@ int main(void) {
           }
         }
       }
-      if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+      if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && dead == 0) {
         if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
           activity[mouseCellY * gridWidth + mouseCellX] = 'F';
         }
@@ -105,8 +107,14 @@ int main(void) {
             DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, GREEN);
             DrawText("F", x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
           }
+          if (activity[y * gridWidth + x] == 0 && dead == 1) {
+            if (tiles[y * gridWidth + x] == 'B') {
+              DrawText("B", x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
+            }
+          }
           if (activity[y * gridWidth + x] == 'C') {
             if (tiles[y * gridWidth + x] == 'B') {
+              dead = 1;
               DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, RED);
             }
             else {
