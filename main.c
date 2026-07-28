@@ -236,6 +236,10 @@ int main(void) {
         }
       }
 
+      if (dead == 0 && IsMouseButtonDown(MOUSE_LEFT_BUTTON) && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
+        drawTile(tile0, mouseCellX * (cellSize + gap), mouseCellY * (cellSize + gap));
+      }
+
       EndDrawing();
     }
 
