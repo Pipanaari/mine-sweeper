@@ -79,7 +79,7 @@ Texture2D loadTexture(const char *fileName) {
 }
 
 int main(void) {
-    int gridWidth = 10, gridHeight = 10, cellSize = 48, gap = 0, bombCount = 10, dead = 0;
+    int gridWidth = 50, gridHeight = 30, cellSize = 48, gap = 0, bombCount = 200, dead = 0;
     char tiles[gridWidth * gridHeight];
     char activity[gridWidth * gridHeight];
 
@@ -123,6 +123,8 @@ int main(void) {
 
       int mouseCellX = mouseX / (cellSize + gap);
       int mouseCellY = mouseY / (cellSize + gap);
+
+      int prevActivity = activity[mouseCellY * gridWidth + mouseCellX];
 
       if (mouseX % (cellSize + gap) > cellSize || mouseCellX >= gridWidth) mouseCellX = -1;
       if (mouseY % (cellSize + gap) > cellSize || mouseCellY >= gridHeight) mouseCellY = -1;
@@ -197,7 +199,7 @@ int main(void) {
       }
 
       // Preview and open neighboring tiles when clicking
-      if (dead == 0 && activity[mouseCellY * gridWidth + mouseCellX] == 'C') {
+      if (dead == 0 && prevActivity == 'C') {
         int howManyFlagsNearCursor = '0';
         // We need to calculate howManyFlagsNearCursor when mouse is released
         if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) || IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
@@ -208,8 +210,7 @@ int main(void) {
               if (y < 0 || y == gridHeight || x < 0 || x == gridWidth) continue;
 
               int pos = y * gridWidth + x;
-              // Only render when mouse is still down
-              if (activity[pos] == 0 && IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+              if (activity[pos] == 0) {
                 drawTile(tile0, x * (cellSize + gap), y * (cellSize + gap));
               }
               if (activity[pos] == 'F') {
