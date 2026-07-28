@@ -28,6 +28,37 @@ void init(int bombCount, int gridWidth, int gridHeight, char tiles[], char activ
   UnloadRandomSequence(bombs);
 }
 
+void clickTile(int tileX, int tileY, int gridWidth, int gridHeight, char tiles[], char activity[], int* dead) {
+  int unvisitedTilesLeft = 1, unvisitedPositions[gridWidth * gridHeight];
+
+  int pos = tileY * gridWidth + tileX;
+  activity[pos] = 'C';
+  unvisitedPositions[0] = pos;
+
+  while (unvisitedTilesLeft) {
+    pos = unvisitedPositions[--unvisitedTilesLeft];
+
+    if (tiles[pos] == 'B') *dead = 1;
+    if (tiles[pos] != '0') continue;
+
+    int x = pos % gridWidth;
+    int y = pos / gridWidth;
+
+    for (int dy = -1; dy <= 1; dy++) {
+      for (int dx = -1; dx <= 1; dx++) {
+        if (y + dy < 0 || y + dy == gridHeight || x + dx < 0 || x + dx == gridWidth) continue;
+
+        pos = (y + dy) * gridWidth + (x + dx);
+        if (activity[pos] == 'C') continue;
+
+        activity[pos] = 'C';
+        if (tiles[pos] == '0') unvisitedPositions[unvisitedTilesLeft++] = pos;
+        if (tiles[pos] == 'B') *dead = 1;
+      }
+    }
+  }
+}
+
 void drawTile(Texture texture, int x, int y) {
   DrawTexturePro(
     texture, 
@@ -96,37 +127,12 @@ int main(void) {
       if (mouseX % (cellSize + gap) > cellSize || mouseCellX >= gridWidth) mouseCellX = -1;
       if (mouseY % (cellSize + gap) > cellSize || mouseCellY >= gridHeight) mouseCellY = -1;
 
-      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && dead == 0) {
+      if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && dead == 0) {
         if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] != 'F') {
-          int unvisitedTilesLeft = 1, unvisitedPositions[gridWidth * gridHeight];
-
-          int pos = mouseCellY * gridWidth + mouseCellX;
-          activity[pos] = 'C';
-          unvisitedPositions[0] = pos;
-
-          while (unvisitedTilesLeft) {
-            pos = unvisitedPositions[--unvisitedTilesLeft];
-
-            if (tiles[pos] != '0') continue;
-
-            int x = pos % gridWidth;
-            int y = pos / gridWidth;
-
-            for (int j = -1; j <= 1; j++) {
-              for (int k = -1; k <= 1; k++) {
-                if (y + j < 0 || y + j == gridHeight || x + k < 0 || x + k == gridWidth) continue;
-
-                pos = (y + j) * gridWidth + (x + k);
-                if (activity[pos] == 'C') continue;
-
-                activity[pos] = 'C';
-                if (tiles[pos] == '0') unvisitedPositions[unvisitedTilesLeft++] = pos;
-              }
-            }
-          }
+          clickTile(mouseCellX, mouseCellY, gridWidth, gridHeight, tiles, activity, &dead);
         }
       }
-      if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && dead == 0) {
+      if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && dead == 0) {
         if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
           activity[mouseCellY * gridWidth + mouseCellX] = 'F';
         }
@@ -156,14 +162,12 @@ int main(void) {
           }
           if (activity[y * gridWidth + x] == 'C') {
             if (tiles[y * gridWidth + x] == 'B') {
-              dead = 1;
               drawTile(explode, x * (cellSize + gap), y * (cellSize + gap));
             }
             else {
               DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, GRAY);
             }
             if (tiles[y * gridWidth + x] == '0') {
-              // DrawText((char []){ tiles[y * gridWidth + x], '\0' }, x * (cellSize + gap), y * (cellSize + gap), cellSize, BLACK);
               drawTile(tile0, x * (cellSize + gap), y * (cellSize + gap));
             }
             if (tiles[y * gridWidth + x] == '1') {
@@ -189,6 +193,46 @@ int main(void) {
             }
             if (tiles[y * gridWidth + x] == '8') {
               drawTile(tile8, x * (cellSize + gap), y * (cellSize + gap));
+            }
+          }
+        }
+      }
+
+      // Preview and open neighboring tiles when clicking
+      if (dead == 0 && activity[mouseCellY * gridWidth + mouseCellX] == 'C') {
+        int howManyFlagsNearCursor = '0';
+        // We need to calculate howManyFlagsNearCursor when mouse is released
+        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) || IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+          for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+              int y = mouseCellY + dy;
+              int x = mouseCellX + dx;
+              if (y < 0 || y == gridHeight || x < 0 || x == gridWidth) continue;
+
+              int pos = y * gridWidth + x;
+              // Only render when mouse is still down
+              if (activity[pos] == 0 && IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+                drawTile(tile0, x * (cellSize + gap), y * (cellSize + gap));
+              }
+              if (activity[pos] == 'F') {
+                howManyFlagsNearCursor++;
+              }
+            }
+          }
+        }
+
+        // If flags near cursor is same as the clicked tile number, click all neighboring tiles
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && howManyFlagsNearCursor == tiles[mouseCellY * gridWidth + mouseCellX]) {
+          for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+              int y = mouseCellY + dy;
+              int x = mouseCellX + dx;
+              if (y < 0 || y == gridHeight || x < 0 || x == gridWidth) continue;
+
+              int pos = y * gridWidth + x;
+              if (activity[pos] == 'F') continue;
+              clickTile(x, y, gridWidth, gridHeight, tiles, activity, &dead);
+              if (tiles[pos] == 'B') dead = 1;
             }
           }
         }
