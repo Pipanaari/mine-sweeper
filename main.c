@@ -146,10 +146,8 @@ int main(void) {
           drawTile(blank, x * (cellSize + gap), y * (cellSize + gap));
 
           if (activity[y * gridWidth + x] == 'F') {
-            if (dead == 1) {
-              if (tiles[y * gridWidth + x] != 'B') {
-                drawTile(not_bomb, x * (cellSize + gap), y * (cellSize + gap));
-              }
+            if (dead == 1 && (tiles[y * gridWidth + x] != 'B')) {
+              drawTile(not_bomb, x * (cellSize + gap), y * (cellSize + gap));
             }
             else {
               drawTile(flag, x * (cellSize + gap), y * (cellSize + gap));
