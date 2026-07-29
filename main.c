@@ -88,7 +88,7 @@ void drawCounterTile(Texture texture, int x, int y) {
   DrawTexturePro(
     texture, 
     (Rectangle){.height = texture.height, .width = texture.width, .x = 0, .y = 0},
-    (Rectangle){.height = 48, .width = 48, .x = x, .y = y},
+    (Rectangle){.height = texture.height * 3, .width = texture.width * 3, .x = x, .y = y},
     (Vector2){.x = 0, .y = 0},
     0,
     WHITE
@@ -103,16 +103,17 @@ void drawCounter(int x, int y, double value, int digits) {
       num += 10;
     }
 
-    if (num == 0.0) drawTile(counter_0, x + i * 50, y);
-    if (num == 1.0) drawTile(counter_1, x + i * 50, y);
-    if (num == 2.0) drawTile(counter_2, x + i * 50, y);
-    if (num == 3.0) drawTile(counter_3, x + i * 50, y);
-    if (num == 4.0) drawTile(counter_4, x + i * 50, y);
-    if (num == 5.0) drawTile(counter_5, x + i * 50, y);
-    if (num == 6.0) drawTile(counter_6, x + i * 50, y);
-    if (num == 7.0) drawTile(counter_7, x + i * 50, y);
-    if (num == 8.0) drawTile(counter_8, x + i * 50, y);
-    if (num == 9.0) drawTile(counter_9, x + i * 50, y);
+    if (value < pow(10, digits - i - 1)) drawCounterTile(counter_blank, x + i * 39, y);
+    else if (num == 0.0) drawCounterTile(counter_0, x + i * 39, y);
+    else if (num == 1.0) drawCounterTile(counter_1, x + i * 39, y);
+    else if (num == 2.0) drawCounterTile(counter_2, x + i * 39, y);
+    else if (num == 3.0) drawCounterTile(counter_3, x + i * 39, y);
+    else if (num == 4.0) drawCounterTile(counter_4, x + i * 39, y);
+    else if (num == 5.0) drawCounterTile(counter_5, x + i * 39, y);
+    else if (num == 6.0) drawCounterTile(counter_6, x + i * 39, y);
+    else if (num == 7.0) drawCounterTile(counter_7, x + i * 39, y);
+    else if (num == 8.0) drawCounterTile(counter_8, x + i * 39, y);
+    else if (num == 9.0) drawCounterTile(counter_9, x + i * 39, y);
   }
 }
 
@@ -304,7 +305,7 @@ int main(void) {
         drawTile(tile0, mouseCellX * (cellSize + gap), mouseCellY * (cellSize + gap));
       }
 
-      // drawCounter(100, 100, 23.0, 3);
+      drawCounter(100, 100, 1234567890, 11);
 
       EndDrawing();
     }
