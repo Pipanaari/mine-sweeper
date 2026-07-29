@@ -1,6 +1,20 @@
 #include "raylib.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+Texture2D counter_blank;
+Texture2D counter_0;
+Texture2D counter_1;
+Texture2D counter_2;
+Texture2D counter_3;
+Texture2D counter_4;
+Texture2D counter_5;
+Texture2D counter_6;
+Texture2D counter_7;
+Texture2D counter_8;
+Texture2D counter_9;
 
 void init(int bombCount, int gridWidth, int gridHeight, char tiles[], char activity[], int* dead) {
   memset(tiles, '0', gridWidth * gridHeight);
@@ -62,7 +76,7 @@ void clickTile(int tileX, int tileY, int gridWidth, int gridHeight, char tiles[]
 void drawTile(Texture texture, int x, int y) {
   DrawTexturePro(
     texture, 
-    (Rectangle){.height = texture.width, .width = texture.height, .x = 0, .y = 0},
+    (Rectangle){.height = texture.height, .width = texture.width, .x = 0, .y = 0},
     (Rectangle){.height = 48, .width = 48, .x = x, .y = y},
     (Vector2){.x = 0, .y = 0},
     0,
@@ -70,10 +84,48 @@ void drawTile(Texture texture, int x, int y) {
   );
 }
 
+void drawCounterTile(Texture texture, int x, int y) {
+  DrawTexturePro(
+    texture, 
+    (Rectangle){.height = texture.height, .width = texture.width, .x = 0, .y = 0},
+    (Rectangle){.height = 48, .width = 48, .x = x, .y = y},
+    (Vector2){.x = 0, .y = 0},
+    0,
+    WHITE
+  );
+}
+
+void drawCounter(int x, int y, double value, int digits) {
+  for (int i = 0; i < digits; i++) {
+    double num = remainder(floor(value / pow(10, digits - i - 1)), 10);
+    // Fix remainders under 10; For example 8 % 10 == -2
+    if (num < 0) {
+      num += 10;
+    }
+
+    if (num == 0.0) drawTile(counter_0, x + i * 50, y);
+    if (num == 1.0) drawTile(counter_1, x + i * 50, y);
+    if (num == 2.0) drawTile(counter_2, x + i * 50, y);
+    if (num == 3.0) drawTile(counter_3, x + i * 50, y);
+    if (num == 4.0) drawTile(counter_4, x + i * 50, y);
+    if (num == 5.0) drawTile(counter_5, x + i * 50, y);
+    if (num == 6.0) drawTile(counter_6, x + i * 50, y);
+    if (num == 7.0) drawTile(counter_7, x + i * 50, y);
+    if (num == 8.0) drawTile(counter_8, x + i * 50, y);
+    if (num == 9.0) drawTile(counter_9, x + i * 50, y);
+  }
+}
+
+
 Texture2D loadTexture(const char *fileName) {
   Image image = LoadImage(fileName);                // Loaded in CPU memory (RAM)
   Texture2D texture = LoadTextureFromImage(image);  // Image converted to texture, GPU memory (VRAM)
   UnloadImage(image);                               // Once image has been converted to texture and uploaded to VRAM, it can be unloaded from RAM
+
+  if (!IsTextureValid(texture)) {
+    printf("Error loading texture \"%s\"", fileName);
+    exit(EXIT_FAILURE);
+  }
 
   return texture;
 }
@@ -108,6 +160,17 @@ int main(void) {
     Texture2D explode = loadTexture("textures/tile-bomb-detonated.png");
     Texture2D not_bomb = loadTexture("textures/tile-bomb-mismarked.png");
 
+    counter_blank = loadTexture("textures/counter-empty.png");
+    counter_0 = loadTexture("textures/counter-0.png");
+    counter_1 = loadTexture("textures/counter-1.png");
+    counter_2 = loadTexture("textures/counter-2.png");
+    counter_3 = loadTexture("textures/counter-3.png");
+    counter_4 = loadTexture("textures/counter-4.png");
+    counter_5 = loadTexture("textures/counter-5.png");
+    counter_6 = loadTexture("textures/counter-6.png");
+    counter_7 = loadTexture("textures/counter-7.png");
+    counter_8 = loadTexture("textures/counter-8.png");
+    counter_9 = loadTexture("textures/counter-9.png");
 
     while (!WindowShouldClose()) {
       if (IsKeyPressed(KEY_R)) {
@@ -240,6 +303,8 @@ int main(void) {
       if (dead == 0 && IsMouseButtonDown(MOUSE_LEFT_BUTTON) && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
         drawTile(tile0, mouseCellX * (cellSize + gap), mouseCellY * (cellSize + gap));
       }
+
+      // drawCounter(100, 100, 23.0, 3);
 
       EndDrawing();
     }
