@@ -16,13 +16,14 @@ Texture2D counter_7;
 Texture2D counter_8;
 Texture2D counter_9;
 
-void init(int bombCount, int gridWidth, int gridHeight, char tiles[], char activity[], int* dead, int* flagsLeft) {
+void init(int bombCount, int gridWidth, int gridHeight, char tiles[], char activity[], int* dead, int* flagsLeft, float* timer) {
   memset(tiles, '0', gridWidth * gridHeight);
   memset(activity, 0, gridWidth * gridHeight);
   int *bombs = LoadRandomSequence(bombCount, 0, gridWidth * gridHeight - 1);
 
   *dead = 0;
   *flagsLeft = bombCount;
+  *timer = 0.0f;
 
   for (int i = 0; i < bombCount; i++) {
 
@@ -43,7 +44,7 @@ void init(int bombCount, int gridWidth, int gridHeight, char tiles[], char activ
   UnloadRandomSequence(bombs);
 }
 
-void clickTile(int tileX, int tileY, int gridWidth, int gridHeight, char tiles[], char activity[], int* dead) {
+void clickTile(int tileX, int tileY, int gridWidth, int gridHeight, char tiles[], char activity[], int* gameState) {
   int unvisitedTilesLeft = 1, unvisitedPositions[gridWidth * gridHeight];
 
   int pos = tileY * gridWidth + tileX;
@@ -53,7 +54,7 @@ void clickTile(int tileX, int tileY, int gridWidth, int gridHeight, char tiles[]
   while (unvisitedTilesLeft) {
     pos = unvisitedPositions[--unvisitedTilesLeft];
 
-    if (tiles[pos] == 'B') *dead = 1;
+    if (tiles[pos] == 'B') *gameState = 1;
     if (tiles[pos] != '0') continue;
 
     int x = pos % gridWidth;
@@ -68,7 +69,7 @@ void clickTile(int tileX, int tileY, int gridWidth, int gridHeight, char tiles[]
 
         activity[pos] = 'C';
         if (tiles[pos] == '0') unvisitedPositions[unvisitedTilesLeft++] = pos;
-        if (tiles[pos] == 'B') *dead = 1;
+        if (tiles[pos] == 'B') *gameState = 1;
       }
     }
   }
@@ -134,10 +135,11 @@ Texture2D loadTexture(const char *fileName) {
 }
 
 int main(void) {
-    int gridWidth = 20, gridHeight = 10, cellSize = 48, gap = 0, bombCount = 40, dead = 0, flagsLeft = bombCount;
+    int gridWidth = 10, gridHeight = 10, cellSize = 48, gap = 0, bombCount = 5, gameState = 0, flagsLeft = bombCount, clickedTiles = 0;
     int bottomMargin = 119;
     char tiles[gridWidth * gridHeight];
     char activity[gridWidth * gridHeight];
+    float timer = 0.0f;
 
     const int screenWidth = (cellSize + gap) * gridWidth - gap;
     const int screenHeight = (cellSize + gap) * gridHeight - gap + bottomMargin;
@@ -150,7 +152,7 @@ int main(void) {
 
     SetTargetFPS(60);
 
-    init(bombCount, gridWidth, gridHeight, tiles, activity, &dead, &flagsLeft);
+    init(bombCount, gridWidth, gridHeight, tiles, activity, &gameState, &flagsLeft, &timer);
 
     Texture2D blank = loadTexture("textures/tile-unknown.png");
     Texture2D tile0 = loadTexture("textures/tile-0.png");
@@ -181,7 +183,22 @@ int main(void) {
 
     while (!WindowShouldClose()) {
       if (IsKeyPressed(KEY_R)) {
-        init(bombCount, gridWidth, gridHeight, tiles, activity, &dead, &flagsLeft);
+        init(bombCount, gridWidth, gridHeight, tiles, activity, &gameState, &flagsLeft, &timer);
+      }
+
+      for (int x = 0; x < gridHeight * gridWidth; x++){
+        if (activity[x] == 'C') {
+          clickedTiles++;
+        }
+        if (clickedTiles == gridHeight * gridWidth - bombCount && gameState == 0){
+          gameState = 2;
+          flagsLeft = 0;
+        }
+      }
+      clickedTiles = 0;
+
+      if (gameState == 0) {
+        timer += GetFrameTime();
       }
 
       BeginDrawing();
@@ -199,12 +216,12 @@ int main(void) {
       if (mouseX % (cellSize + gap) > cellSize || mouseCellX >= gridWidth) mouseCellX = -1;
       if (mouseY % (cellSize + gap) > cellSize || mouseCellY >= gridHeight) mouseCellY = -1;
 
-      if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && dead == 0) {
+      if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && gameState == 0) {
         if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] != 'F') {
-          clickTile(mouseCellX, mouseCellY, gridWidth, gridHeight, tiles, activity, &dead);
+          clickTile(mouseCellX, mouseCellY, gridWidth, gridHeight, tiles, activity, &gameState);
         }
       }
-      if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && dead == 0) {
+      if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && gameState == 0) {
         if (flagsLeft > 0 && mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
           activity[mouseCellY * gridWidth + mouseCellX] = 'F';
           flagsLeft--;
@@ -220,14 +237,19 @@ int main(void) {
           drawTile(blank, x * (cellSize + gap), y * (cellSize + gap));
 
           if (activity[y * gridWidth + x] == 'F') {
-            if (dead == 1 && (tiles[y * gridWidth + x] != 'B')) {
+            if (gameState == 1 && (tiles[y * gridWidth + x] != 'B')) {
               drawTile(not_bomb, x * (cellSize + gap), y * (cellSize + gap));
             }
             else {
               drawTile(flag, x * (cellSize + gap), y * (cellSize + gap));
             }
           }
-          if (activity[y * gridWidth + x] == 0 && dead == 1) {
+          if (activity[y * gridWidth + x] == 0 && gameState == 2) {
+            if (tiles[y * gridWidth + x] == 'B') {
+              drawTile(flag, x * (cellSize + gap), y * (cellSize + gap));
+            }
+          }
+          if (activity[y * gridWidth + x] == 0 && gameState == 1) {
             if (tiles[y * gridWidth + x] == 'B') {
               drawTile(bomb, x * (cellSize + gap), y * (cellSize + gap));
             }
@@ -271,7 +293,7 @@ int main(void) {
       }
 
       // Preview and open neighboring tiles when clicking
-      if (dead == 0 && prevActivity == 'C') {
+      if (gameState == 0 && prevActivity == 'C') {
         int howManyFlagsNearCursor = '0';
         // We need to calculate howManyFlagsNearCursor when mouse is released
         if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) || IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
@@ -302,18 +324,21 @@ int main(void) {
 
               int pos = y * gridWidth + x;
               if (activity[pos] == 'F') continue;
-              clickTile(x, y, gridWidth, gridHeight, tiles, activity, &dead);
-              if (tiles[pos] == 'B') dead = 1;
+              clickTile(x, y, gridWidth, gridHeight, tiles, activity, &gameState);
+              if (tiles[pos] == 'B') gameState = 1;
             }
           }
         }
       }
 
-      if (dead == 0 && IsMouseButtonDown(MOUSE_LEFT_BUTTON) && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
+      if (gameState == 0 && IsMouseButtonDown(MOUSE_LEFT_BUTTON) && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
         drawTile(tile0, mouseCellX * (cellSize + gap), mouseCellY * (cellSize + gap));
       }
 
       drawCounter(cellSize / 2, gridHeight * cellSize + cellSize / 2, flagsLeft, 3);
+      //drawCounter(100, 100, 1234567890, 11);
+      drawCounter(screenWidth - 200, gridHeight * cellSize + cellSize / 2, timer * 100, 5);
+      DrawText(TextFormat("%.2f", timer), 20, 20, 20, WHITE);
 
       EndDrawing();
     }
