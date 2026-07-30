@@ -142,6 +142,9 @@ int main(void) {
 
     InitWindow(screenWidth, screenHeight, "Mine Sweeper");
 
+    Image icon = LoadImage("textures/icon.png");
+    SetWindowIcon(icon);
+
     SetTargetFPS(60);
 
     init(bombCount, gridWidth, gridHeight, tiles, activity, &dead);
