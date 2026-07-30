@@ -16,12 +16,13 @@ Texture2D counter_7;
 Texture2D counter_8;
 Texture2D counter_9;
 
-void init(int bombCount, int gridWidth, int gridHeight, char tiles[], char activity[], int* dead) {
+void init(int bombCount, int gridWidth, int gridHeight, char tiles[], char activity[], int* dead, int* flagsLeft) {
   memset(tiles, '0', gridWidth * gridHeight);
   memset(activity, 0, gridWidth * gridHeight);
   int *bombs = LoadRandomSequence(bombCount, 0, gridWidth * gridHeight - 1);
 
   *dead = 0;
+  *flagsLeft = bombCount;
 
   for (int i = 0; i < bombCount; i++) {
 
@@ -132,12 +133,13 @@ Texture2D loadTexture(const char *fileName) {
 }
 
 int main(void) {
-    int gridWidth = 50, gridHeight = 30, cellSize = 48, gap = 0, bombCount = 200, dead = 0;
+    int gridWidth = 20, gridHeight = 10, cellSize = 48, gap = 0, bombCount = 40, dead = 0, flagsLeft = bombCount;
+    int bottomMargin = 119;
     char tiles[gridWidth * gridHeight];
     char activity[gridWidth * gridHeight];
 
     const int screenWidth = (cellSize + gap) * gridWidth - gap;
-    const int screenHeight = (cellSize + gap) * gridHeight - gap;
+    const int screenHeight = (cellSize + gap) * gridHeight - gap + bottomMargin;
 
 
     InitWindow(screenWidth, screenHeight, "Mine Sweeper");
@@ -147,7 +149,7 @@ int main(void) {
 
     SetTargetFPS(60);
 
-    init(bombCount, gridWidth, gridHeight, tiles, activity, &dead);
+    init(bombCount, gridWidth, gridHeight, tiles, activity, &dead, &flagsLeft);
 
     Texture2D blank = loadTexture("textures/tile-unknown.png");
     Texture2D tile0 = loadTexture("textures/tile-0.png");
@@ -178,12 +180,12 @@ int main(void) {
 
     while (!WindowShouldClose()) {
       if (IsKeyPressed(KEY_R)) {
-        init(bombCount, gridWidth, gridHeight, tiles, activity, &dead);
+        init(bombCount, gridWidth, gridHeight, tiles, activity, &dead, &flagsLeft);
       }
 
       BeginDrawing();
 
-      ClearBackground(RAYWHITE);
+      ClearBackground((Color){.r = 192, .g = 192, .b = 192, .a = 1});
 
       int mouseX = GetMouseX();
       int mouseY = GetMouseY();
@@ -202,11 +204,13 @@ int main(void) {
         }
       }
       if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && dead == 0) {
-        if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
+        if (flagsLeft > 0 && mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
           activity[mouseCellY * gridWidth + mouseCellX] = 'F';
+          flagsLeft--;
         }
         else if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 'F'){
           activity[mouseCellY * gridWidth + mouseCellX] = 0;
+          flagsLeft++;
         }
       }
 
@@ -308,7 +312,7 @@ int main(void) {
         drawTile(tile0, mouseCellX * (cellSize + gap), mouseCellY * (cellSize + gap));
       }
 
-      drawCounter(100, 100, 1234567890, 11);
+      drawCounter(cellSize / 2, gridHeight * cellSize + cellSize / 2, flagsLeft, 3);
 
       EndDrawing();
     }
