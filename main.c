@@ -98,7 +98,11 @@ void drawCounterTile(Texture texture, int x, int y) {
   );
 }
 
-void drawCounter(int x, int y, double value, int digits) {
+void drawCounter(int x, int y, double value, int digits, int max) {
+  if (value > max) {
+    value = max;
+  }
+
   for (int i = 0; i < digits; i++) {
     double num = remainder(floor(value / pow(10, digits - i - 1)), 10);
     // Fix remainders under 10; For example 8 % 10 == -2
@@ -336,8 +340,8 @@ int main(void) {
         drawTile(tile0, mouseCellX * (cellSize + gap), mouseCellY * (cellSize + gap));
       }
 
-      drawCounter(cellSize / 2, gridHeight * cellSize + cellSize / 2, flagsLeft, 3);
-      drawCounter(screenWidth - 200, gridHeight * cellSize + cellSize / 2, timer * 100, 5);
+      drawCounter(cellSize / 2, gridHeight * cellSize + cellSize / 2, flagsLeft, 3, 999);
+      drawCounter(screenWidth - 200, gridHeight * cellSize + cellSize / 2, timer * 100, 5, 99999);
 
       EndDrawing();
     }
