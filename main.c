@@ -107,7 +107,7 @@ void drawCounter(int x, int y, double value, int digits, int max) {
       num += 10;
     }
 
-    if (value == 0.0 && i == digits - 1) drawCounterTile(counter_0, x + i * 39, y);
+    if (value < 1 && i == digits - 1) drawCounterTile(counter_0, x + i * 39, y);
     else if (value < pow(10, digits - i - 1)) drawCounterTile(counter_blank, x + i * 39, y);
     else if (num == 0.0) drawCounterTile(counter_0, x + i * 39, y);
     else if (num == 1.0) drawCounterTile(counter_1, x + i * 39, y);
