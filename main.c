@@ -44,7 +44,7 @@ void init(int bombCount, int gridWidth, int gridHeight, char tiles[], char activ
   UnloadRandomSequence(bombs);
 }
 
-void clickTile(int tileX, int tileY, int gridWidth, int gridHeight, char tiles[], char activity[], int* gameState) {
+void clickTile(int tileX, int tileY, int gridWidth, int gridHeight, char tiles[], char activity[], int* gameState, int* flagsLeft) {
   int unvisitedTilesLeft = 1, unvisitedPositions[gridWidth * gridHeight];
 
   int pos = tileY * gridWidth + tileX;
@@ -67,6 +67,7 @@ void clickTile(int tileX, int tileY, int gridWidth, int gridHeight, char tiles[]
         pos = (y + dy) * gridWidth + (x + dx);
         if (activity[pos] == 'C') continue;
 
+        if (activity[pos] == 'F') *flagsLeft += 1;
         activity[pos] = 'C';
         if (tiles[pos] == '0') unvisitedPositions[unvisitedTilesLeft++] = pos;
         if (tiles[pos] == 'B') *gameState = 1;
@@ -218,7 +219,7 @@ int main(void) {
 
       if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && gameState == 0) {
         if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] != 'F') {
-          clickTile(mouseCellX, mouseCellY, gridWidth, gridHeight, tiles, activity, &gameState);
+          clickTile(mouseCellX, mouseCellY, gridWidth, gridHeight, tiles, activity, &gameState, &flagsLeft);
         }
       }
       if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && gameState == 0) {
@@ -324,7 +325,7 @@ int main(void) {
 
               int pos = y * gridWidth + x;
               if (activity[pos] == 'F') continue;
-              clickTile(x, y, gridWidth, gridHeight, tiles, activity, &gameState);
+              clickTile(x, y, gridWidth, gridHeight, tiles, activity, &gameState, &flagsLeft);
               if (tiles[pos] == 'B') gameState = 1;
             }
           }
