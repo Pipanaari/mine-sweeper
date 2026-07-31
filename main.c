@@ -16,12 +16,12 @@ Texture2D counter_7;
 Texture2D counter_8;
 Texture2D counter_9;
 
-void init(int bombCount, int gridWidth, int gridHeight, char tiles[], char activity[], int* dead, int* flagsLeft, float* timer) {
+void init(int bombCount, int gridWidth, int gridHeight, char tiles[], char activity[], int* gameState, int* flagsLeft, float* timer) {
   memset(tiles, '0', gridWidth * gridHeight);
   memset(activity, 0, gridWidth * gridHeight);
   int *bombs = LoadRandomSequence(bombCount, 0, gridWidth * gridHeight - 1);
 
-  *dead = 0;
+  *gameState = 3;
   *flagsLeft = bombCount;
   *timer = 0.0f;
 
@@ -138,7 +138,7 @@ Texture2D loadTexture(const char *fileName) {
 
 int main(void) {
   int offsetTop = 119;
-  int gridWidth = 10, gridHeight = 10, cellSize = 48, bombCount = 5, gameState = 0, flagsLeft = bombCount, clickedTiles = 0;
+  int gridWidth = 10, gridHeight = 10, cellSize = 48, bombCount = 5, gameState = 3, flagsLeft = bombCount, clickedTiles = 0;
   char tiles[gridWidth * gridHeight];
   char activity[gridWidth * gridHeight];
   float timer = 0.0f;
@@ -219,15 +219,17 @@ int main(void) {
     if (mouseX % cellSize > cellSize || mouseCellX >= gridWidth) mouseCellX = -1;
     if (mouseY % cellSize > cellSize || mouseCellY >= gridHeight) mouseCellY = -1;
 
-    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && gameState == 0) {
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && (gameState == 0 || gameState == 3)) {
       if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] != 'F') {
+        gameState = 0;
         clickTile(mouseCellX, mouseCellY, gridWidth, gridHeight, tiles, activity, &gameState, &flagsLeft);
       }
     }
-    if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && gameState == 0) {
+    if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && (gameState == 0 || gameState == 3)) {
       if (flagsLeft > 0 && mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
         activity[mouseCellY * gridWidth + mouseCellX] = 'F';
         flagsLeft--;
+        gameState = 0;
       }
       else if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 'F'){
         activity[mouseCellY * gridWidth + mouseCellX] = 0;
