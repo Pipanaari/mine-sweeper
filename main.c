@@ -76,26 +76,22 @@ void clickTile(int tileX, int tileY, int gridWidth, int gridHeight, char tiles[]
   }
 }
 
-void drawTile(Texture texture, int x, int y) {
+void drawTexture(Texture texture, int x, int y, int width, int height) {
   DrawTexturePro(
     texture, 
     (Rectangle){.height = texture.height, .width = texture.width, .x = 0, .y = 0},
-    (Rectangle){.height = 48, .width = 48, .x = x, .y = y},
+    (Rectangle){.height = height, .width = width, .x = x, .y = y},
     (Vector2){.x = 0, .y = 0},
     0,
     WHITE
   );
 }
+void drawTile(Texture texture, int x, int y) {
+  drawTexture(texture, x, y, 48, 48);
+}
 
 void drawCounterTile(Texture texture, int x, int y) {
-  DrawTexturePro(
-    texture, 
-    (Rectangle){.height = texture.height, .width = texture.width, .x = 0, .y = 0},
-    (Rectangle){.height = texture.height * 3, .width = texture.width * 3, .x = x, .y = y},
-    (Vector2){.x = 0, .y = 0},
-    0,
-    WHITE
-  );
+  drawTexture(texture, x, y, texture.width * 3, texture.height * 3);
 }
 
 void drawCounter(int x, int y, double value, int digits, int max) {
@@ -185,6 +181,7 @@ int main(void) {
     counter_7 = loadTexture("textures/counter-7.png");
     counter_8 = loadTexture("textures/counter-8.png");
     counter_9 = loadTexture("textures/counter-9.png");
+    Texture2D counter_dot = loadTexture("textures/counter-dot.png");
 
     while (!WindowShouldClose()) {
       if (IsKeyPressed(KEY_R)) {
@@ -341,7 +338,9 @@ int main(void) {
       }
 
       drawCounter(cellSize / 2, gridHeight * cellSize + cellSize / 2, flagsLeft, 3, 999);
-      drawCounter(screenWidth - 200, gridHeight * cellSize + cellSize / 2, timer * 100, 5, 99999);
+      drawCounter(screenWidth - (cellSize / 2) - (39 * 4) - (21), gridHeight * cellSize + cellSize / 2, timer, 3, 999);
+      drawCounterTile(counter_dot, screenWidth - (cellSize / 2) - 39 - 21, gridHeight * cellSize + cellSize / 2);
+      drawCounter(screenWidth - (cellSize / 2) - 39, gridHeight * cellSize + cellSize / 2, timer * 10, 1, 9999);
 
       EndDrawing();
     }
