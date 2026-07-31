@@ -86,6 +86,7 @@ void drawTexture(Texture texture, int x, int y, int width, int height) {
     WHITE
   );
 }
+
 void drawTile(Texture texture, int x, int y) {
   drawTexture(texture, x, y, 48, 48);
 }
@@ -136,215 +137,215 @@ Texture2D loadTexture(const char *fileName) {
 }
 
 int main(void) {
-    int gridWidth = 10, gridHeight = 10, cellSize = 48, gap = 0, bombCount = 5, gameState = 0, flagsLeft = bombCount, clickedTiles = 0;
-    int bottomMargin = 119;
-    char tiles[gridWidth * gridHeight];
-    char activity[gridWidth * gridHeight];
-    float timer = 0.0f;
+  int offsetTop = 119;
+  int gridWidth = 10, gridHeight = 10, cellSize = 48, bombCount = 5, gameState = 0, flagsLeft = bombCount, clickedTiles = 0;
+  char tiles[gridWidth * gridHeight];
+  char activity[gridWidth * gridHeight];
+  float timer = 0.0f;
 
-    const int screenWidth = (cellSize + gap) * gridWidth - gap;
-    const int screenHeight = (cellSize + gap) * gridHeight - gap + bottomMargin;
+  const int screenWidth = cellSize * gridWidth;
+  const int screenHeight = cellSize * gridHeight + offsetTop;
 
 
-    InitWindow(screenWidth, screenHeight, "Mine Sweeper");
+  InitWindow(screenWidth, screenHeight, "Mine Sweeper");
 
-    Image icon = LoadImage("textures/icon.png");
-    SetWindowIcon(icon);
+  Image icon = LoadImage("textures/icon.png");
+  SetWindowIcon(icon);
 
-    SetTargetFPS(60);
+  SetTargetFPS(60);
 
-    init(bombCount, gridWidth, gridHeight, tiles, activity, &gameState, &flagsLeft, &timer);
+  init(bombCount, gridWidth, gridHeight, tiles, activity, &gameState, &flagsLeft, &timer);
 
-    Texture2D blank = loadTexture("textures/tile-unknown.png");
-    Texture2D tile0 = loadTexture("textures/tile-0.png");
-    Texture2D tile1 = loadTexture("textures/tile-1.png");
-    Texture2D tile2 = loadTexture("textures/tile-2.png");
-    Texture2D tile3 = loadTexture("textures/tile-3.png");
-    Texture2D tile4 = loadTexture("textures/tile-4.png");
-    Texture2D tile5 = loadTexture("textures/tile-5.png");
-    Texture2D tile6 = loadTexture("textures/tile-6.png");
-    Texture2D tile7 = loadTexture("textures/tile-7.png");
-    Texture2D tile8 = loadTexture("textures/tile-8.png");
-    Texture2D flag = loadTexture("textures/tile-flag.png");
-    Texture2D bomb = loadTexture("textures/tile-bomb.png");
-    Texture2D explode = loadTexture("textures/tile-bomb-detonated.png");
-    Texture2D not_bomb = loadTexture("textures/tile-bomb-mismarked.png");
+  Texture2D blank = loadTexture("textures/tile-unknown.png");
+  Texture2D tile0 = loadTexture("textures/tile-0.png");
+  Texture2D tile1 = loadTexture("textures/tile-1.png");
+  Texture2D tile2 = loadTexture("textures/tile-2.png");
+  Texture2D tile3 = loadTexture("textures/tile-3.png");
+  Texture2D tile4 = loadTexture("textures/tile-4.png");
+  Texture2D tile5 = loadTexture("textures/tile-5.png");
+  Texture2D tile6 = loadTexture("textures/tile-6.png");
+  Texture2D tile7 = loadTexture("textures/tile-7.png");
+  Texture2D tile8 = loadTexture("textures/tile-8.png");
+  Texture2D flag = loadTexture("textures/tile-flag.png");
+  Texture2D bomb = loadTexture("textures/tile-bomb.png");
+  Texture2D explode = loadTexture("textures/tile-bomb-detonated.png");
+  Texture2D not_bomb = loadTexture("textures/tile-bomb-mismarked.png");
 
-    counter_blank = loadTexture("textures/counter-empty.png");
-    counter_0 = loadTexture("textures/counter-0.png");
-    counter_1 = loadTexture("textures/counter-1.png");
-    counter_2 = loadTexture("textures/counter-2.png");
-    counter_3 = loadTexture("textures/counter-3.png");
-    counter_4 = loadTexture("textures/counter-4.png");
-    counter_5 = loadTexture("textures/counter-5.png");
-    counter_6 = loadTexture("textures/counter-6.png");
-    counter_7 = loadTexture("textures/counter-7.png");
-    counter_8 = loadTexture("textures/counter-8.png");
-    counter_9 = loadTexture("textures/counter-9.png");
-    Texture2D counter_dot = loadTexture("textures/counter-dot.png");
+  counter_blank = loadTexture("textures/counter-empty.png");
+  counter_0 = loadTexture("textures/counter-0.png");
+  counter_1 = loadTexture("textures/counter-1.png");
+  counter_2 = loadTexture("textures/counter-2.png");
+  counter_3 = loadTexture("textures/counter-3.png");
+  counter_4 = loadTexture("textures/counter-4.png");
+  counter_5 = loadTexture("textures/counter-5.png");
+  counter_6 = loadTexture("textures/counter-6.png");
+  counter_7 = loadTexture("textures/counter-7.png");
+  counter_8 = loadTexture("textures/counter-8.png");
+  counter_9 = loadTexture("textures/counter-9.png");
+  Texture2D counter_dot = loadTexture("textures/counter-dot.png");
 
-    while (!WindowShouldClose()) {
-      if (IsKeyPressed(KEY_R)) {
-        init(bombCount, gridWidth, gridHeight, tiles, activity, &gameState, &flagsLeft, &timer);
-      }
-
-      for (int x = 0; x < gridHeight * gridWidth; x++){
-        if (activity[x] == 'C') {
-          clickedTiles++;
-        }
-        if (clickedTiles == gridHeight * gridWidth - bombCount && gameState == 0){
-          gameState = 2;
-          flagsLeft = 0;
-        }
-      }
-      clickedTiles = 0;
-
-      if (gameState == 0) {
-        timer += GetFrameTime();
-      }
-
-      BeginDrawing();
-
-      ClearBackground((Color){.r = 192, .g = 192, .b = 192, .a = 1});
-
-      int mouseX = GetMouseX();
-      int mouseY = GetMouseY();
-
-      int mouseCellX = mouseX / (cellSize + gap);
-      int mouseCellY = mouseY / (cellSize + gap);
-
-      int prevActivity = activity[mouseCellY * gridWidth + mouseCellX];
-
-      if (mouseX % (cellSize + gap) > cellSize || mouseCellX >= gridWidth) mouseCellX = -1;
-      if (mouseY % (cellSize + gap) > cellSize || mouseCellY >= gridHeight) mouseCellY = -1;
-
-      if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && gameState == 0) {
-        if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] != 'F') {
-          clickTile(mouseCellX, mouseCellY, gridWidth, gridHeight, tiles, activity, &gameState, &flagsLeft);
-        }
-      }
-      if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && gameState == 0) {
-        if (flagsLeft > 0 && mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
-          activity[mouseCellY * gridWidth + mouseCellX] = 'F';
-          flagsLeft--;
-        }
-        else if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 'F'){
-          activity[mouseCellY * gridWidth + mouseCellX] = 0;
-          flagsLeft++;
-        }
-      }
-
-      for (int y = 0; y < gridHeight; y++) {
-        for (int x = 0; x < gridWidth; x++) {
-          drawTile(blank, x * (cellSize + gap), y * (cellSize + gap));
-
-          if (activity[y * gridWidth + x] == 'F') {
-            if (gameState == 1 && (tiles[y * gridWidth + x] != 'B')) {
-              drawTile(not_bomb, x * (cellSize + gap), y * (cellSize + gap));
-            }
-            else {
-              drawTile(flag, x * (cellSize + gap), y * (cellSize + gap));
-            }
-          }
-          if (activity[y * gridWidth + x] == 0 && gameState == 2) {
-            if (tiles[y * gridWidth + x] == 'B') {
-              drawTile(flag, x * (cellSize + gap), y * (cellSize + gap));
-            }
-          }
-          if (activity[y * gridWidth + x] == 0 && gameState == 1) {
-            if (tiles[y * gridWidth + x] == 'B') {
-              drawTile(bomb, x * (cellSize + gap), y * (cellSize + gap));
-            }
-          }
-          if (activity[y * gridWidth + x] == 'C') {
-            if (tiles[y * gridWidth + x] == 'B') {
-              drawTile(explode, x * (cellSize + gap), y * (cellSize + gap));
-            }
-            else {
-              DrawRectangle(x * (cellSize + gap), y * (cellSize + gap), cellSize, cellSize, GRAY);
-            }
-            if (tiles[y * gridWidth + x] == '0') {
-              drawTile(tile0, x * (cellSize + gap), y * (cellSize + gap));
-            }
-            if (tiles[y * gridWidth + x] == '1') {
-              drawTile(tile1, x * (cellSize + gap), y * (cellSize + gap));
-            }
-            if (tiles[y * gridWidth + x] == '2') {
-              drawTile(tile2, x * (cellSize + gap), y * (cellSize + gap));
-            }
-            if (tiles[y * gridWidth + x] == '3') {
-              drawTile(tile3, x * (cellSize + gap), y * (cellSize + gap));
-            }
-            if (tiles[y * gridWidth + x] == '4') {
-              drawTile(tile4, x * (cellSize + gap), y * (cellSize + gap));
-            }
-            if (tiles[y * gridWidth + x] == '5') {
-              drawTile(tile5, x * (cellSize + gap), y * (cellSize + gap));
-            }
-            if (tiles[y * gridWidth + x] == '6') {
-              drawTile(tile6, x * (cellSize + gap), y * (cellSize + gap));
-            }
-            if (tiles[y * gridWidth + x] == '7') {
-              drawTile(tile7, x * (cellSize + gap), y * (cellSize + gap));
-            }
-            if (tiles[y * gridWidth + x] == '8') {
-              drawTile(tile8, x * (cellSize + gap), y * (cellSize + gap));
-            }
-          }
-        }
-      }
-
-      // Preview and open neighboring tiles when clicking
-      if (gameState == 0 && prevActivity == 'C') {
-        int howManyFlagsNearCursor = '0';
-        // We need to calculate howManyFlagsNearCursor when mouse is released
-        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) || IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-          for (int dy = -1; dy <= 1; dy++) {
-            for (int dx = -1; dx <= 1; dx++) {
-              int y = mouseCellY + dy;
-              int x = mouseCellX + dx;
-              if (y < 0 || y == gridHeight || x < 0 || x == gridWidth) continue;
-
-              int pos = y * gridWidth + x;
-              if (activity[pos] == 0) {
-                drawTile(tile0, x * (cellSize + gap), y * (cellSize + gap));
-              }
-              if (activity[pos] == 'F') {
-                howManyFlagsNearCursor++;
-              }
-            }
-          }
-        }
-
-        // If flags near cursor is same as the clicked tile number, click all neighboring tiles
-        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && howManyFlagsNearCursor == tiles[mouseCellY * gridWidth + mouseCellX]) {
-          for (int dy = -1; dy <= 1; dy++) {
-            for (int dx = -1; dx <= 1; dx++) {
-              int y = mouseCellY + dy;
-              int x = mouseCellX + dx;
-              if (y < 0 || y == gridHeight || x < 0 || x == gridWidth) continue;
-
-              int pos = y * gridWidth + x;
-              if (activity[pos] == 'F') continue;
-              clickTile(x, y, gridWidth, gridHeight, tiles, activity, &gameState, &flagsLeft);
-              if (tiles[pos] == 'B') gameState = 1;
-            }
-          }
-        }
-      }
-
-      if (gameState == 0 && IsMouseButtonDown(MOUSE_LEFT_BUTTON) && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
-        drawTile(tile0, mouseCellX * (cellSize + gap), mouseCellY * (cellSize + gap));
-      }
-
-      drawCounter(cellSize / 2, gridHeight * cellSize + cellSize / 2, flagsLeft, 3, 999);
-      drawCounter(screenWidth - (cellSize / 2) - (39 * 4) - (21), gridHeight * cellSize + cellSize / 2, timer, 3, 999);
-      drawCounterTile(counter_dot, screenWidth - (cellSize / 2) - 39 - 21, gridHeight * cellSize + cellSize / 2);
-      drawCounter(screenWidth - (cellSize / 2) - 39, gridHeight * cellSize + cellSize / 2, timer * 10, 1, 9999);
-
-      EndDrawing();
+  while (!WindowShouldClose()) {
+    if (IsKeyPressed(KEY_R)) {
+      init(bombCount, gridWidth, gridHeight, tiles, activity, &gameState, &flagsLeft, &timer);
     }
 
-    CloseWindow();
-    return 0;
+    for (int x = 0; x < gridHeight * gridWidth; x++){
+      if (activity[x] == 'C') {
+        clickedTiles++;
+      }
+      if (clickedTiles == gridHeight * gridWidth - bombCount && gameState == 0){
+        gameState = 2;
+        flagsLeft = 0;
+      }
+    }
+    clickedTiles = 0;
+
+    if (gameState == 0) {
+      timer += GetFrameTime();
+    }
+
+    BeginDrawing();
+
+    ClearBackground((Color){.r = 192, .g = 192, .b = 192, .a = 1});
+
+    int mouseX = GetMouseX();
+    int mouseY = GetMouseY() - offsetTop;
+
+    int mouseCellX = mouseX / cellSize;
+    int mouseCellY = mouseY / cellSize;
+
+    int prevActivity = activity[mouseCellY * gridWidth + mouseCellX];
+
+    if (mouseX % cellSize > cellSize || mouseCellX >= gridWidth) mouseCellX = -1;
+    if (mouseY % cellSize > cellSize || mouseCellY >= gridHeight) mouseCellY = -1;
+
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && gameState == 0) {
+      if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] != 'F') {
+        clickTile(mouseCellX, mouseCellY, gridWidth, gridHeight, tiles, activity, &gameState, &flagsLeft);
+      }
+    }
+    if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && gameState == 0) {
+      if (flagsLeft > 0 && mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
+        activity[mouseCellY * gridWidth + mouseCellX] = 'F';
+        flagsLeft--;
+      }
+      else if (mouseCellY != -1 && mouseCellX != -1 && activity[mouseCellY * gridWidth + mouseCellX] == 'F'){
+        activity[mouseCellY * gridWidth + mouseCellX] = 0;
+        flagsLeft++;
+      }
+    }
+
+    for (int y = 0; y < gridHeight; y++) {
+      for (int x = 0; x < gridWidth; x++) {
+        drawTile(blank, x * cellSize, offsetTop + y * cellSize);
+
+        if (activity[y * gridWidth + x] == 'F') {
+          if (gameState == 1 && (tiles[y * gridWidth + x] != 'B')) {
+            drawTile(not_bomb, x * cellSize, offsetTop + y * cellSize);
+          }
+          else {
+            drawTile(flag, x * cellSize, offsetTop + y * cellSize);
+          }
+        }
+        if (activity[y * gridWidth + x] == 0 && gameState == 2) {
+          if (tiles[y * gridWidth + x] == 'B') {
+            drawTile(flag, x * cellSize, offsetTop + y * cellSize);
+          }
+        }
+        if (activity[y * gridWidth + x] == 0 && gameState == 1) {
+          if (tiles[y * gridWidth + x] == 'B') {
+            drawTile(bomb, x * cellSize, offsetTop + y * cellSize);
+          }
+        }
+        if (activity[y * gridWidth + x] == 'C') {
+          if (tiles[y * gridWidth + x] == 'B') {
+            drawTile(explode, x * cellSize, offsetTop + y * cellSize);
+          }
+          else {
+            DrawRectangle(x * cellSize, offsetTop + y * cellSize, cellSize, cellSize, GRAY);
+          }
+          if (tiles[y * gridWidth + x] == '0') {
+            drawTile(tile0, x * cellSize, offsetTop + y * cellSize);
+          }
+          if (tiles[y * gridWidth + x] == '1') {
+            drawTile(tile1, x * cellSize, offsetTop + y * cellSize);
+          }
+          if (tiles[y * gridWidth + x] == '2') {
+            drawTile(tile2, x * cellSize, offsetTop + y * cellSize);
+          }
+          if (tiles[y * gridWidth + x] == '3') {
+            drawTile(tile3, x * cellSize, offsetTop + y * cellSize);
+          }
+          if (tiles[y * gridWidth + x] == '4') {
+            drawTile(tile4, x * cellSize, offsetTop + y * cellSize);
+          }
+          if (tiles[y * gridWidth + x] == '5') {
+            drawTile(tile5, x * cellSize, offsetTop + y * cellSize);
+          }
+          if (tiles[y * gridWidth + x] == '6') {
+            drawTile(tile6, x * cellSize, offsetTop + y * cellSize);
+          }
+          if (tiles[y * gridWidth + x] == '7') {
+            drawTile(tile7, x * cellSize, offsetTop + y * cellSize);
+          }
+          if (tiles[y * gridWidth + x] == '8') {
+            drawTile(tile8, x * cellSize, offsetTop + y * cellSize);
+          }
+        }
+      }
+    }
+
+    // Preview and open neighboring tiles when clicking
+    if (gameState == 0 && prevActivity == 'C') {
+      int howManyFlagsNearCursor = '0';
+      // We need to calculate howManyFlagsNearCursor when mouse is released
+      if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) || IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+        for (int dy = -1; dy <= 1; dy++) {
+          for (int dx = -1; dx <= 1; dx++) {
+            int y = mouseCellY + dy;
+            int x = mouseCellX + dx;
+            if (y < 0 || y == gridHeight || x < 0 || x == gridWidth) continue;
+
+            int pos = y * gridWidth + x;
+            if (activity[pos] == 0) {
+              drawTile(tile0, x * cellSize, offsetTop + y * cellSize);
+            }
+            if (activity[pos] == 'F') {
+              howManyFlagsNearCursor++;
+            }
+          }
+        }
+      }
+
+      // If flags near cursor is same as the clicked tile number, click all neighboring tiles
+      if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && howManyFlagsNearCursor == tiles[mouseCellY * gridWidth + mouseCellX]) {
+        for (int dy = -1; dy <= 1; dy++) {
+          for (int dx = -1; dx <= 1; dx++) {
+            int y = mouseCellY + dy;
+            int x = mouseCellX + dx;
+            if (y < 0 || y == gridHeight || x < 0 || x == gridWidth) continue;
+
+            int pos = y * gridWidth + x;
+            if (activity[pos] == 'F') continue;
+            clickTile(x, y, gridWidth, gridHeight, tiles, activity, &gameState, &flagsLeft);
+            if (tiles[pos] == 'B') gameState = 1;
+          }
+        }
+      }
+    }
+
+    if (gameState == 0 && IsMouseButtonDown(MOUSE_LEFT_BUTTON) && activity[mouseCellY * gridWidth + mouseCellX] == 0) {
+      drawTile(tile0, mouseCellX * cellSize, offsetTop + mouseCellY * cellSize);
+    }
+
+    drawCounter(cellSize / 2, cellSize / 2, flagsLeft, 3, 999);
+    drawCounter(screenWidth - (cellSize / 2) - (39 * 4) - (21), cellSize / 2, timer, 3, 999);
+    drawCounterTile(counter_dot, screenWidth - (cellSize / 2) - 39 - 21, cellSize / 2);
+    drawCounter(screenWidth - (cellSize / 2) - 39, cellSize / 2, timer * 10, 1, 9999);
+
+    EndDrawing();
+  }
+
+  CloseWindow();
+  return 0;
 }
