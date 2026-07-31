@@ -336,9 +336,7 @@ int main(void) {
       }
 
       drawCounter(cellSize / 2, gridHeight * cellSize + cellSize / 2, flagsLeft, 3);
-      //drawCounter(100, 100, 1234567890, 11);
       drawCounter(screenWidth - 200, gridHeight * cellSize + cellSize / 2, timer * 100, 5);
-      DrawText(TextFormat("%.2f", timer), 20, 20, 20, WHITE);
 
       EndDrawing();
     }
